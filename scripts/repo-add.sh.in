@@ -361,6 +361,13 @@ db_write_entry() {
 		format_entry "CSIZE"     "$csize"
 		format_entry "ISIZE"     "$size"
 
+		format_entry "DEPENDS"    "${_depends[@]}"
+		format_entry "CONFLICTS"  "${_conflicts[@]}"
+		format_entry "PROVIDES"   "${_provides[@]}"
+		format_entry "OPTDEPENDS" "${_optdepends[@]}"
+		format_entry "MAKEDEPENDS" "${_makedepends[@]}"
+		format_entry "CHECKDEPENDS" "${_checkdepends[@]}"
+
 		# add checksums
 		format_entry "MD5SUM"    "$md5sum"
 		format_entry "SHA256SUM" "$sha256sum"
@@ -375,17 +382,6 @@ db_write_entry() {
 		format_entry "PACKAGER"  "$packager"
 		format_entry "REPLACES"  "${_replaces[@]}"
 	} >'desc'
-
-	# create depends entry
-	msg2 "$(gettext "Creating '%s' db entry...")" 'depends'
-	{
-		format_entry "DEPENDS" "${_depends[@]}"
-		format_entry "CONFLICTS" "${_conflicts[@]}"
-		format_entry "PROVIDES" "${_provides[@]}"
-		format_entry "OPTDEPENDS" "${_optdepends[@]}"
-		format_entry "MAKEDEPENDS" "${_makedepends[@]}"
-		format_entry "CHECKDEPENDS" "${_checkdepends[@]}"
-	} >'depends'
 
 	popd >/dev/null
 	popd >/dev/null
