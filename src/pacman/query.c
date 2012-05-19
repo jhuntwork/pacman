@@ -554,6 +554,11 @@ int pacman_query(alpm_list_t *targets)
 	for(i = targets; i; i = alpm_list_next(i)) {
 		const char *strname = i->data;
 
+		/* strip leading "local/" */
+		if(strncmp(strname, "local/", 6) == 0) {
+			strname+=6;
+		}
+
 		if(config->op_q_isfile) {
 			alpm_pkg_load(config->handle, strname, 1, 0, &pkg);
 		} else {
