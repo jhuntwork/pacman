@@ -113,6 +113,7 @@ static int query_fileowner(alpm_list_t *targets)
 	size_t rootlen;
 	alpm_list_t *t;
 	alpm_db_t *db_local;
+	alpm_list_t *packages;
 
 	/* This code is here for safety only */
 	if(targets == NULL) {
@@ -133,13 +134,14 @@ static int query_fileowner(alpm_list_t *targets)
 	strcpy(path, root);
 
 	db_local = alpm_get_localdb(config->handle);
+	packages = alpm_db_get_pkgcache(db_local);
 
 	for(t = targets; t; t = alpm_list_next(t)) {
 		char *filename, *dname, *rpath;
-		const char *bname;
+		const char *bname, *rpath_bname = NULL;
 		struct stat buf;
 		alpm_list_t *i;
-		int found = 0;
+		size_t found = 0, isdir, bname_len, rpath_len = 0, rpath_bname_len = 0;
 
 		filename = strdup(t->data);
 
@@ -162,16 +164,19 @@ static int query_fileowner(alpm_list_t *targets)
 			}
 		}
 
-		if(S_ISDIR(buf.st_mode)) {
-			pm_printf(ALPM_LOG_ERROR,
-				_("cannot determine ownership of directory '%s'\n"), filename);
-			ret++;
-			free(filename);
-			continue;
+		/* make sure directories have a trailing '/' */
+		if((isdir = S_ISDIR(buf.st_mode))) {
+			size_t len = strlen(filename);
+			if(filename[len-1] != '/') {
+				filename = realloc(filename, sizeof(char) * (len + 2));
+				strcat(filename, "/");
+			}
 		}
 
 		bname = mbasename(filename);
+		bname_len = strlen(bname);
 		dname = mdirname(filename);
+
 		/* for files in '/', there is no directory name to match */
 		if(strcmp(dname, "") == 0) {
 			rpath = NULL;
@@ -181,16 +186,26 @@ static int query_fileowner(alpm_list_t *targets)
 			if(!rpath) {
 				pm_printf(ALPM_LOG_ERROR, _("cannot determine real path for '%s': %s\n"),
 						filename, strerror(errno));
-				free(filename);
 				free(dname);
-				free(rpath);
 				ret++;
-				continue;
+				goto cleanup;
 			}
 		}
 		free(dname);
 
-		for(i = alpm_db_get_pkgcache(db_local); i && !found; i = alpm_list_next(i)) {
+		if(isdir) {
+			if(!rpath) {
+				pm_printf(ALPM_LOG_ERROR, _("cannot determine ownership of root directory\n"));
+				ret++;
+				goto cleanup;
+			} else {
+				rpath_len = strlen(rpath);
+				rpath_bname = mbasename(rpath);
+				rpath_bname_len = strlen(rpath_bname);
+			}
+		}
+
+		for(i = packages; i && (!found || isdir); i = alpm_list_next(i)) {
 			alpm_pkg_t *info = i->data;
 			alpm_filelist_t *filelist = alpm_pkg_get_files(info);
 			size_t j;
@@ -199,17 +214,40 @@ static int query_fileowner(alpm_list_t *targets)
 				const alpm_file_t *file = filelist->files + j;
 				char *ppath, *pdname;
 				const char *pkgfile = file->name;
+				size_t pkgfile_len = strlen(pkgfile);
 
-				/* avoid the costly resolve_path usage if the basenames don't match */
-				if(strcmp(mbasename(pkgfile), bname) != 0) {
+				/* avoid the costly resolve_path usage if the basenames don't match;
+				 * we can also cheat by comparing the final characters first and avoid
+				 * a full string comparison */
+				if(!isdir && (pkgfile[pkgfile_len - 1] != bname[bname_len - 1] ||
+						strcmp(mbasename(pkgfile), bname) != 0)) {
 					continue;
+				}
+
+				if(isdir) {
+					/* check the filelist entry is a directory using its
+					 * trailing '/' and compare final characters of directory
+					 * names. */
+					if(pkgfile[pkgfile_len - 1] != '/' ||
+							pkgfile[pkgfile_len - 2] != rpath[rpath_len - 1]) {
+						continue;
+					}
+
+					/* compare final directory portion */
+					if(pkgfile_len - 1 < rpath_bname_len ||
+							(pkgfile_len - 2 >= rpath_bname_len &&
+							pkgfile[pkgfile_len - 2 - rpath_bname_len] != '/') ||
+							strncmp(pkgfile + pkgfile_len - 1 - rpath_bname_len,
+									rpath_bname, rpath_bname_len)) {
+						continue;
+					}
 				}
 
 				/* for files in '/', there is no directory name to match */
 				if(!rpath) {
 					print_query_fileowner(filename, info);
 					found = 1;
-					continue;
+					break;
 				}
 
 				if(rootlen + 1 + strlen(pkgfile) > PATH_MAX) {
@@ -233,6 +271,8 @@ static int query_fileowner(alpm_list_t *targets)
 			pm_printf(ALPM_LOG_ERROR, _("No package owns %s\n"), filename);
 			ret++;
 		}
+
+cleanup:
 		free(filename);
 		free(rpath);
 	}
