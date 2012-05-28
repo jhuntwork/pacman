@@ -1,4 +1,5 @@
 makepkg
+makepkg-wrapper
 pacman-db-upgrade
 pacman-key
 pacman-optimize
