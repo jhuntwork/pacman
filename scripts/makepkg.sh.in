@@ -44,6 +44,8 @@ declare -r confdir='@sysconfdir@'
 declare -r BUILDSCRIPT='@BUILDSCRIPT@'
 declare -r startdir="$PWD"
 
+LIBRARY=${LIBRARY:-'@datadir@/makepkg'}
+
 packaging_options=('strip' 'docs' 'libtool' 'emptydirs' 'zipman' 'purge' 'upx')
 other_options=('ccache' 'distcc' 'buildflags' 'makeflags')
 splitpkg_overrides=('pkgver' 'pkgrel' 'epoch' 'pkgdesc' 'arch' 'url' 'license' \
