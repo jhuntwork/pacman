@@ -6,9 +6,11 @@ typeset -A opt_args
 
 # options for passing to _arguments: main pacman commands
 _pacman_opts_commands=(
+	'-D[Modify database]'
 	'-Q[Query the package database]'
 	'-R[Remove a package from the system]'
 	'-S[Synchronize packages]'
+	'-T[Check if dependencies are installed]'
 	'-U[Upgrade a package]'
 	'-V[Display version and exit]'
 	'-h[Display usage]'
@@ -69,6 +71,11 @@ _pacman_opts_remove=(
 	'-s[Remove dependencies not required by other packages]'
 	'--dbonly[Only remove database entry, do not remove files]'
 	'*:installed package:_pacman_completions_installed_packages'
+)
+
+_pacman_opts_database=(
+    '--asdeps[mark packages as non-explicitly installed]'
+    '--asexplicit[mark packages as explicitly installed]'
 )
 
 # options for passing to _arguments: options for --sync command
@@ -163,6 +170,16 @@ _pacman_action_remove() {
 		"$_pacman_opts_common[@]" \
 		"$_pacman_opts_remove[@]"
 }
+
+# handles --database subcommand
+_pacman_action_database() {
+	_arguments -s : \
+		'-D' \
+		"$_pacman_opts_common[@]" \
+		"$_pacman_opts_database[@]"
+}
+
+
 
 # handles --sync subcommand
 _pacman_action_sync() {
@@ -309,6 +326,13 @@ _pacman_zsh_comp() {
 		-Q*)  _pacman_action_query    ;;
 		-R*)  _pacman_action_remove   ;;
 		-S*c*) # no completion
+		-T*)
+			 _arguments -s : \
+				'-T' \
+				"$_pacman_opts_common[@]" \
+				":packages:_pacman_all_packages"
+			 ;;
+		-D*)  _pacman_action_database ;;
 			return 0
 			;;
 		-S*l*) # repos
