@@ -79,6 +79,7 @@ _pacman_opts_remove=(
 _pacman_opts_database=(
 	'--asdeps[mark packages as non-explicitly installed]'
 	'--asexplicit[mark packages as explicitly installed]'
+	'*:installed package:_pacman_completions_installed_packages'
 )
 
 # options for passing to _arguments: options for --sync command
