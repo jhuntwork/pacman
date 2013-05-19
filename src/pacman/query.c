@@ -318,8 +318,17 @@ static int display(alpm_pkg_t *pkg)
 			&& !config->op_q_changelog && !config->op_q_check) {
 		if(!config->quiet) {
 			const colstr_t *colstr = &config->colstr;
-			printf("%s%s %s%s%s\n", colstr->title, alpm_pkg_get_name(pkg),
-					colstr->version, alpm_pkg_get_version(pkg), colstr->nocolor);
+			const char *pkgname = alpm_pkg_get_name(pkg);
+			const char *pkgver = alpm_pkg_get_version(pkg);
+
+			if(config->op_q_upgrade &&
+					alpm_list_find_str(alpm_option_get_ignorepkgs(config->handle), pkgname)) {
+				printf("%s%s %s%s%s %s\n", colstr->title, pkgname, colstr->version,
+						pkgver, colstr->nocolor, _("[ignored]"));
+			} else {
+				printf("%s%s %s%s%s\n", colstr->title, pkgname, colstr->version,
+						pkgver, colstr->nocolor);
+			}
 		} else {
 			printf("%s\n", alpm_pkg_get_name(pkg));
 		}
