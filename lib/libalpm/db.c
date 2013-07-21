@@ -44,7 +44,7 @@
 
 /** Register a sync database of packages. */
 alpm_db_t SYMEXPORT *alpm_register_syncdb(alpm_handle_t *handle,
-		const char *treename, alpm_siglevel_t level)
+		const char *treename, alpm_siglevel_t level, int skip)
 {
 	/* Sanity checks */
 	CHECK_HANDLE(handle, return NULL);
@@ -53,7 +53,7 @@ alpm_db_t SYMEXPORT *alpm_register_syncdb(alpm_handle_t *handle,
 	/* Do not register a database if a transaction is on-going */
 	ASSERT(handle->trans == NULL, RET_ERR(handle, ALPM_ERR_TRANS_NOT_NULL, NULL));
 
-	return _alpm_db_register_sync(handle, treename, level);
+	return _alpm_db_register_sync(handle, treename, level, skip);
 }
 
 /* Helper function for alpm_db_unregister{_all} */

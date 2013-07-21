@@ -211,7 +211,7 @@ static int register_syncs(void)
 			section = strndup(&line[1], linelen - 2);
 
 			if(section && strcmp(section, "options") != 0) {
-				alpm_register_syncdb(handle, section, level);
+				alpm_register_syncdb(handle, section, level, 0);
 			}
 		}
 	}

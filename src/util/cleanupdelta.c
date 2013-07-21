@@ -74,7 +74,7 @@ static void checkdbs(alpm_list_t *dbnames)
 
 	for(i = dbnames; i; i = alpm_list_next(i)) {
 		const char *dbname = i->data;
-		db = alpm_register_syncdb(handle, dbname, level);
+		db = alpm_register_syncdb(handle, dbname, level, 0);
 		if(db == NULL) {
 			fprintf(stderr, "error: could not register sync database '%s' (%s)\n",
 					dbname, alpm_strerror(alpm_errno(handle)));
