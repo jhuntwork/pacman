@@ -48,6 +48,7 @@ enum _alpm_dbstatus_t {
 	DB_STATUS_INVALID = (1 << 1),
 	DB_STATUS_EXISTS = (1 << 2),
 	DB_STATUS_MISSING = (1 << 3),
+	DB_STATUS_MISSING_SIG = (1 << 4),
 
 	DB_STATUS_LOCAL = (1 << 10),
 	DB_STATUS_PKGCACHE = (1 << 11),
