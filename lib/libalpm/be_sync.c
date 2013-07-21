@@ -683,7 +683,7 @@ struct db_operations sync_db_ops = {
 };
 
 alpm_db_t *_alpm_db_register_sync(alpm_handle_t *handle, const char *treename,
-		alpm_siglevel_t level)
+		alpm_siglevel_t level, int skip)
 {
 	alpm_db_t *db;
 
@@ -703,7 +703,9 @@ alpm_db_t *_alpm_db_register_sync(alpm_handle_t *handle, const char *treename,
 	db->handle = handle;
 	db->siglevel = level;
 
-	sync_db_validate(db);
+	if(!skip) {
+		sync_db_validate(db);
+	}
 
 	handle->dbs_sync = alpm_list_add(handle->dbs_sync, db);
 	return db;

@@ -626,10 +626,11 @@ alpm_list_t *alpm_get_syncdbs(alpm_handle_t *handle);
  * @param treename the name of the sync repository
  * @param level what level of signature checking to perform on the
  * database; note that this must be a '.sig' file type verification
+ * @param skip skip initial validation of sync dbs
  * @return an alpm_db_t* on success (the value), NULL on error
  */
 alpm_db_t *alpm_register_syncdb(alpm_handle_t *handle, const char *treename,
-		alpm_siglevel_t level);
+		alpm_siglevel_t level, int skip);
 
 /** Unregister all package databases.
  * @param handle the context handle

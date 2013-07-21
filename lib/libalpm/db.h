@@ -84,7 +84,7 @@ int _alpm_db_cmp(const void *d1, const void *d2);
 alpm_list_t *_alpm_db_search(alpm_db_t *db, const alpm_list_t *needles);
 alpm_db_t *_alpm_db_register_local(alpm_handle_t *handle);
 alpm_db_t *_alpm_db_register_sync(alpm_handle_t *handle, const char *treename,
-		alpm_siglevel_t level);
+		alpm_siglevel_t level, int skip);
 void _alpm_db_unregister(alpm_db_t *db);
 
 /* be_*.c, backend specific calls */
