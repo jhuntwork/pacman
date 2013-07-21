@@ -76,8 +76,13 @@ static int sync_db_validate(alpm_db_t *db)
 	if(db->status & DB_STATUS_VALID || db->status & DB_STATUS_MISSING) {
 		return 0;
 	}
+
 	if(db->status & DB_STATUS_INVALID) {
-		db->handle->pm_errno = ALPM_ERR_DB_INVALID_SIG;
+		if(db->status & DB_STATUS_MISSING_SIG) {
+			db->handle->pm_errno = ALPM_ERR_DB_MISSING_SIG;
+		} else {
+			db->handle->pm_errno = ALPM_ERR_DB_INVALID_SIG;
+		}
 		return -1;
 	}
 
@@ -121,7 +126,12 @@ static int sync_db_validate(alpm_db_t *db)
 		if(ret) {
 			db->status &= ~DB_STATUS_VALID;
 			db->status |= DB_STATUS_INVALID;
-			db->handle->pm_errno = ALPM_ERR_DB_INVALID_SIG;
+			if(db->handle->pm_errno == ALPM_ERR_SIG_MISSING) {
+				db->status |= DB_STATUS_MISSING_SIG;
+				db->handle->pm_errno = ALPM_ERR_DB_MISSING_SIG;
+			} else {
+				db->handle->pm_errno = ALPM_ERR_DB_INVALID_SIG;
+			}
 			return 1;
 		}
 	}

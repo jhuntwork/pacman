@@ -72,6 +72,8 @@ const char SYMEXPORT *alpm_strerror(alpm_errno_t err)
 			return _("invalid or corrupted database");
 		case ALPM_ERR_DB_INVALID_SIG:
 			return _("invalid or corrupted database (PGP signature)");
+		case ALPM_ERR_DB_MISSING_SIG:
+			return _("database missing required signature");
 		case ALPM_ERR_DB_VERSION:
 			return _("database is incorrect version");
 		case ALPM_ERR_DB_WRITE:
